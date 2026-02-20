@@ -81,7 +81,7 @@ class SettingsController extends Controller
     public function updatePhoto(Request $request)
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         $user = Auth::user();
@@ -100,7 +100,7 @@ class SettingsController extends Controller
     }
 
     /**
-     * Delete foto profil admin
+     * Delete foto profil
      */
     public function deletePhoto()
     {
@@ -112,50 +112,6 @@ class SettingsController extends Controller
         }
 
         return back()->with('success', 'Foto profil berhasil dihapus');
-    }
-
-    /**
-     * Update notifikasi preferences admin
-     */
-    public function updateNotifications(Request $request)
-    {
-        $user = Auth::user();
-
-        $preferences = [
-            'email_notifications' => $request->boolean('email_notifications'),
-            'task_reminders' => $request->boolean('task_reminders'),
-            'weekly_summary' => $request->boolean('weekly_summary'),
-            'system_alerts' => $request->boolean('system_alerts'),
-        ];
-
-        $user->update([
-            'notification_preferences' => json_encode($preferences)
-        ]);
-
-        return back()->with('success', 'Preferensi notifikasi berhasil diperbarui');
-    }
-
-    /**
-     * Update tema/appearance admin
-     */
-    public function updateAppearance(Request $request)
-    {
-        $validated = $request->validate([
-            'theme' => 'required|in:light,dark,auto',
-            'language' => 'required|in:id,en',
-        ]);
-
-        $user = Auth::user();
-
-        $preferences = json_decode($user->preferences ?? '{}', true);
-        $preferences['theme'] = $validated['theme'];
-        $preferences['language'] = $validated['language'];
-
-        $user->update([
-            'preferences' => json_encode($preferences)
-        ]);
-
-        return back()->with('success', 'Pengaturan tampilan berhasil diperbarui');
     }
 
     /**

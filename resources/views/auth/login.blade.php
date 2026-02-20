@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Penjadwalan BPS</title>
+
+     <link rel="shortcut icon" href="{{ asset('gambar/favicon.ico') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .bg-pattern {

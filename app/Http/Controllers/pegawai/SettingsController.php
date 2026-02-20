@@ -20,14 +20,14 @@ class SettingsController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Statistik user
         $statistik = [
             'total_tugas' => $user->penugasan()->count(),
-            'tugas_selesai' => $user->penugasan()->whereHas('tugas', function($q) {
+            'tugas_selesai' => $user->penugasan()->whereHas('tugas', function ($q) {
                 $q->where('status', 'selesai');
             })->count(),
-            'total_jam' => $user->penugasan()->with('tugas')->get()->sum(function($p) {
+            'total_jam' => $user->penugasan()->with('tugas')->get()->sum(function ($p) {
                 return $p->tugas->durasi ?? 0;
             }),
             'tugas_bulan_ini' => $user->tugasBulanan(),
@@ -43,7 +43,7 @@ class SettingsController extends Controller
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -85,22 +85,27 @@ class SettingsController extends Controller
     public function updatePhoto(Request $request)
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $user = Auth::user();
+        $user = auth()->user();
 
-        // Delete old photo if exists
-        if ($user->photo && Storage::disk('public')->exists($user->photo)) {
-            Storage::disk('public')->delete($user->photo);
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama dari storage jika bukan foto default
+            if ($user->photo && Storage::disk('public')->exists($user->photo)) {
+                Storage::disk('public')->delete($user->photo);
+            }
+
+            // Simpan foto baru
+            $path = $request->file('photo')->store('profile-photos', 'public');
+
+            // Update database
+            $user->update(['photo' => $path]);
+
+            return back()->with('success', 'Foto profil berhasil diperbarui!');
         }
 
-        // Store new photo
-        $path = $request->file('photo')->store('profile-photos', 'public');
-
-        $user->update(['photo' => $path]);
-
-        return back()->with('success', 'Foto profil berhasil diperbarui');
+        return back()->with('error', 'Gagal mengupload foto.');
     }
 
     /**
@@ -124,7 +129,7 @@ class SettingsController extends Controller
     public function updateNotifications(Request $request)
     {
         $user = Auth::user();
-        
+
         $preferences = [
             'email_notifications' => $request->boolean('email_notifications'),
             'task_reminders' => $request->boolean('task_reminders'),
@@ -149,7 +154,7 @@ class SettingsController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         $user->update([
             'preferences' => json_encode([
                 'theme' => $validated['theme'],

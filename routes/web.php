@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\PenjadwalanController;
 use App\Http\Controllers\Pegawai\DashboardController as PegawaiDashboard;
 use App\Http\Controllers\Pegawai\SettingsController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Middleware;
 
 // ============================================
@@ -112,34 +113,46 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 // ============================================
-// PEGAWAI ROUTES - Protected by auth and role check
+// PEGAWAI ROUTES
 // ============================================
-
 Route::middleware(['auth', 'check.role:pegawai'])->prefix('pegawai')->name('pegawai.')->group(function () {
-    // Dashboard
+
     Route::get('/dashboard', [PegawaiDashboard::class, 'index'])->name('dashboard');
-
-    // Jadwal Tugas
     Route::get('/jadwal-tugas', [PegawaiDashboard::class, 'jadwalTugas'])->name('jadwal');
-
-    // Riwayat Tugas
     Route::get('/riwayat-tugas', [PegawaiDashboard::class, 'riwayatTugas'])->name('riwayat');
-
-    // Detail Tugas
     Route::get('/tugas/{tugas}', [PegawaiDashboard::class, 'detailTugas'])->name('tugas.detail');
-
-    // Profil
     Route::get('/profil', [PegawaiDashboard::class, 'profil'])->name('profil');
-    Route::put('/profil/update', [PegawaiDashboard::class, 'updateProfil'])->name('profil.update');
 
-    //settings
+    // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
-        Route::put('/profile', [SettingsController::class, 'updateProfile'])->name('update-profile');
-        Route::put('/password', [SettingsController::class, 'updatePassword'])->name('update-password');
+        Route::post('/profile', [SettingsController::class, 'updateProfile'])->name('update-profile');
+        Route::post('/password', [SettingsController::class, 'updatePassword'])->name('update-password');
         Route::post('/photo', [SettingsController::class, 'updatePhoto'])->name('update-photo');
         Route::delete('/photo', [SettingsController::class, 'deletePhoto'])->name('delete-photo');
-        Route::put('/notifications', [SettingsController::class, 'updateNotifications'])->name('update-notifications');
-        Route::put('/appearance', [SettingsController::class, 'updateAppearance'])->name('update-appearance');
     });
+});
+
+// ============================================
+// NOTIFICATION ROUTES
+// ============================================
+
+// Routes untuk Admin
+Route::middleware(['auth'])->group(function () {
+    // Check if user is admin
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    });
+
+    // Routes untuk Pegawai
+    Route::prefix('pegawai')->name('pegawai.')->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    });
+
+    // Shared notification endpoints (tanpa prefix admin/pegawai)
+    Route::get('/notifications/fetch', [NotificationController::class, 'fetch'])->name('notifications.fetch');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::delete('/notifications/delete-all-read', [NotificationController::class, 'deleteAllRead'])->name('notifications.delete-all-read');
 });

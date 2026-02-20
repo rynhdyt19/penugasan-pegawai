@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -7,6 +8,7 @@ use App\Models\Penugasan;
 use App\Models\RoundRobinQueue;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Providers\NotificationService;
 use Carbon\Carbon;
 
 class TugasController extends Controller
@@ -16,7 +18,7 @@ class TugasController extends Controller
         $tugas = Tugas::with('penugasan.user')
             ->orderBy('tanggal', 'desc')
             ->paginate(10);
-        
+
         return view('admin.tugas.index', compact('tugas'));
     }
 
@@ -50,7 +52,7 @@ class TugasController extends Controller
         // Auto assign jika diminta
         if ($request->auto_assign) {
             $result = $this->autoAssign($tugas);
-            
+
             if ($result) {
                 return redirect()->route('admin.tugas.index')
                     ->with('success', 'Tugas berhasil ditambahkan dan ditugaskan ke ' . $result->name);
@@ -97,12 +99,12 @@ class TugasController extends Controller
     public function assign(Tugas $tugas)
     {
         $result = $this->autoAssign($tugas);
-        
+
         if ($result) {
             return redirect()->route('admin.tugas.index')
                 ->with('success', 'Tugas berhasil ditugaskan ke ' . $result->name);
         }
-        
+
         return redirect()->route('admin.tugas.index')
             ->with('error', 'Tidak ada pegawai yang tersedia. Semua pegawai sudah mencapai batas maksimal tugas.');
     }
@@ -115,33 +117,54 @@ class TugasController extends Controller
 
     private function autoAssign(Tugas $tugas)
     {
-        // Get next available pegawai dari round robin queue
         $queue = RoundRobinQueue::getNextAvailable();
-        
+
         if (!$queue) {
             return false;
         }
 
-        // Create penugasan
-        Penugasan::create([
-            'tugas_id' => $tugas->id,
-            'user_id' => $queue->user_id,
-            'assigned_at' => Carbon::now(),
+        // ✅ Ambil user
+        $user = $queue->user;
+
+        if (!$user) {
+            return false;
+        }
+
+        // ✅ Buat penugasan
+        $penugasan = Penugasan::create([
+            'tugas_id'    => $tugas->id,
+            'user_id'     => $user->id,
+            'assigned_at' => now(),
+            'status'      => 'assigned'
         ]);
 
-        // Update tugas status
-        $tugas->update(['status' => 'assigned']);
+        if (!$penugasan) {
+            return false;
+        }
 
-        // Update queue
-        $queue->total_assigned += 1;
-        $queue->last_assigned_at = Carbon::now();
-        $queue->save();
+        // ✅ Update tugas
+        $tugas->update([
+            'status' => 'assigned'
+        ]);
 
-        // Rotate queue
+        // ✅ Update queue
+        $queue->increment('total_assigned');
+        $queue->update([
+            'last_assigned_at' => now()
+        ]);
+
         $queue->rotate();
 
-        return $queue->user;
+        // ✅ Kirim notifikasi
+        NotificationService::taskAssigned(
+            $user,
+            $tugas, 
+            $penugasan
+        );
+
+        return $user;
     }
+
 
     public function assignManual(Request $request, Tugas $tugas)
     {
@@ -157,14 +180,17 @@ class TugasController extends Controller
         }
 
         // Create penugasan
-        Penugasan::create([
+        $penugasan = Penugasan::create([
             'tugas_id' => $tugas->id,
             'user_id' => $user->id,
             'assigned_at' => Carbon::now(),
         ]);
 
-        // Update tugas status
         $tugas->update(['status' => 'assigned']);
+
+        // ✅ KIRIM NOTIFIKASI
+        NotificationService::taskAssigned($user, $tugas, $penugasan);
+
 
         // Update queue statistics
         $queue = RoundRobinQueue::where('user_id', $user->id)->first();
