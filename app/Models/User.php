@@ -26,6 +26,7 @@ class User extends Authenticatable
         'jabatan',
         'seksi',
         'kontak',
+        'photo',
         'max_tugas_mingguan',
         'max_tugas_bulanan',
     ];

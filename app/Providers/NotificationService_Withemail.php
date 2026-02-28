@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace App\Services;
 
 use App\Models\Notification;
 use App\Models\User;
@@ -8,7 +8,6 @@ use App\Models\Tugas;
 use App\Models\Penugasan;
 use App\Mail\NotificationEmail;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
@@ -16,13 +15,13 @@ class NotificationService
      * Create a new notification and optionally send email.
      */
     public static function create(
-        User $user, 
-        string $title, 
-        string $message, 
-        string $type = 'info', 
-        ?string $url = null, 
+        User $user,
+        string $title,
+        string $message,
+        string $type = 'info',
+        ?string $url = null,
         ?string $icon = null,
-        bool $sendEmail = true  // Parameter baru untuk kontrol email
+        bool $sendEmail = true  // Default: kirim email
     ): Notification {
         // Create notification in database
         $notification = Notification::create([
@@ -40,7 +39,7 @@ class NotificationService
                 Mail::to($user->email)->send(new NotificationEmail($user, $notification));
             } catch (\Exception $e) {
                 // Log error tapi jangan stop execution
-                Log::error('Failed to send notification email: ' . $e->getMessage());
+                \Log::error('Failed to send notification email: ' . $e->getMessage());
             }
         }
 
@@ -75,7 +74,7 @@ class NotificationService
             message: "Penugasan untuk tugas '{$tugas->nama_tugas}' telah dibatalkan",
             type: 'warning',
             url: route('pegawai.jadwal'),
-            sendEmail: true  // Kirim email
+            sendEmail: true
         );
     }
 
@@ -141,7 +140,7 @@ class NotificationService
             message: "Selamat! Tugas '{$tugas->nama_tugas}' telah selesai dikerjakan",
             type: 'success',
             url: route('pegawai.riwayat'),
-            sendEmail: true  // Kirim email
+            sendEmail: true
         );
     }
 
@@ -156,7 +155,7 @@ class NotificationService
             message: "Anda telah mencapai batas maksimal tugas untuk periode ini",
             type: 'warning',
             url: route('pegawai.dashboard'),
-            sendEmail: false  // Tidak perlu email
+            sendEmail: false
         );
     }
 
@@ -190,7 +189,7 @@ class NotificationService
             message: "{$assignedCount} tugas baru telah dijadwalkan secara otomatis untuk Anda",
             type: 'info',
             url: route('pegawai.jadwal'),
-            sendEmail: true  // Kirim email
+            sendEmail: true
         );
     }
 
@@ -205,7 +204,7 @@ class NotificationService
             message: "Posisi Anda dalam antrian penjadwalan sekarang: #{$position}",
             type: 'info',
             url: route('pegawai.dashboard'),
-            sendEmail: false  // Tidak perlu email
+            sendEmail: false  // Queue rotation tidak perlu email
         );
     }
 
@@ -220,7 +219,7 @@ class NotificationService
             message: "Anda berada di urutan pertama untuk menerima tugas berikutnya",
             type: 'info',
             url: route('pegawai.dashboard'),
-            sendEmail: false  // Tidak perlu email
+            sendEmail: false
         );
     }
 
@@ -238,7 +237,7 @@ class NotificationService
                 message: $message,
                 type: $type,
                 url: $url,
-                sendEmail: $sendEmail  // Admin notif biasanya tidak perlu email
+                sendEmail: $sendEmail  // Admin notification biasanya tidak perlu email
             );
         }
     }
@@ -296,7 +295,7 @@ class NotificationService
             message: "Batas tugas Anda telah diperbarui: Mingguan: {$maxMingguan}, Bulanan: {$maxBulanan}",
             type: 'info',
             url: route('pegawai.dashboard'),
-            sendEmail: true  // Kirim email
+            sendEmail: true
         );
     }
 

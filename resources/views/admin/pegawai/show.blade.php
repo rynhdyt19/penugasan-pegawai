@@ -84,23 +84,32 @@
 
                 <div class="bg-indigo-900 rounded-3xl p-6 text-white shadow-xl">
                     <h4 class="text-sm font-black uppercase tracking-widest text-indigo-300 mb-4">Kuota Batas Tugas</h4>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span>Mingguan</span>
-                                <span class="font-bold">{{ $pegawai->max_tugas_mingguan }} Tugas</span>
-                            </div>
-                            <div class="w-full bg-white/10 rounded-full h-1.5">
-                                <div class="bg-indigo-400 h-1.5 rounded-full" style="width: 70%"></div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-gray-400 uppercase">Mingguan</span>
+                            <span
+                                class="{{ $pegawai->tugasMingguan() > $pegawai->max_tugas_mingguan ? 'text-red-500' : 'text-indigo-400' }}">
+                                {{ $pegawai->tugasMingguan() }} / {{ $pegawai->max_tugas_mingguan }} Tugas
+                            </span>
+                        </div>
+                        <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-500 {{ $pegawai->tugasMingguan() >= $pegawai->max_tugas_mingguan ? 'bg-red-500' : 'bg-indigo-500' }}"
+                                style="width: {{ $pegawai->bar_width_mingguan }}%">
                             </div>
                         </div>
-                        <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span>Bulanan</span>
-                                <span class="font-bold">{{ $pegawai->max_tugas_bulanan }} Tugas</span>
-                            </div>
-                            <div class="w-full bg-white/10 rounded-full h-1.5">
-                                <div class="bg-purple-400 h-1.5 rounded-full" style="width: 50%"></div>
+                    </div>
+
+                    <div class="space-y-2 mt-4">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-gray-400 uppercase">Bulanan</span>
+                            <span
+                                class="{{ $pegawai->tugasBulanan() > $pegawai->max_tugas_bulanan ? 'text-red-500' : 'text-indigo-400' }}">
+                                {{ $pegawai->tugasBulanan() }} / {{ $pegawai->max_tugas_bulanan }} Tugas
+                            </span>
+                        </div>
+                        <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-500 {{ $pegawai->tugasBulanan() >= $pegawai->max_tugas_bulanan ? 'bg-red-500' : 'bg-purple-500' }}"
+                                style="width: {{ $pegawai->bar_width_bulanan }}%">
                             </div>
                         </div>
                     </div>

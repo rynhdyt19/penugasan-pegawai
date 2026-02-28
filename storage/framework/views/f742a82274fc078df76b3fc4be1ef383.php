@@ -15,17 +15,17 @@
     <div x-show="open" x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
-        class="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50"
-        style="display: none;">
+        x-transition:leave-end="opacity-0 scale-95" /* Perubahan Class: Menggunakan fixed di mobile dan absolute di
+        desktop */
+        class="fixed inset-x-4 top-20 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-3 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[60]"
+        style="display: none; max-height: calc(100vh - 120px);">
 
-        <!-- Header -->
-        <div class="p-4 border-b border-gray-100">
+        <div class="p-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl z-10">
             <div class="flex items-center justify-between">
                 <h3 class="text-sm font-black text-gray-900">Notifikasi</h3>
                 <div class="flex items-center gap-2">
                     <button @click="markAllAsRead" x-show="unreadCount > 0"
-                        class="text-xs font-bold text-indigo-600 hover:text-indigo-700">
+                        class="text-[10px] sm:text-xs font-bold text-indigo-600 hover:text-indigo-700">
                         Tandai Semua Dibaca
                     </button>
                     <?php
@@ -34,15 +34,15 @@
                                 ? 'admin.notifications.index'
                                 : 'pegawai.notifications.index';
                     ?>
-                    <a href="<?php echo e(route($notifRoute)); ?>" class="text-xs font-bold text-gray-500 hover:text-gray-700">
+                    <a href="<?php echo e(route($notifRoute)); ?>"
+                        class="text-[10px] sm:text-xs font-bold text-gray-500 hover:text-gray-700">
                         Lihat Semua
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Notifications List -->
-        <div class="max-h-96 overflow-y-auto custom-scrollbar">
+        <div class="overflow-y-auto custom-scrollbar" style="max-height: 60vh;">
             <template x-if="notifications.length === 0">
                 <div class="p-8 text-center">
                     <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor"
@@ -56,55 +56,52 @@
 
             <template x-for="notification in notifications" :key="notification.id">
                 <div @click="handleNotificationClick(notification)"
-                    x-bind:class="!notification.is_read ? 'bg-indigo-50' : ''"
-                    class="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-all">
+                    x-bind:class="!notification.is_read ? 'bg-indigo-50/50' : ''"
+                    class="p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-all">
                     <div class="flex gap-3">
-                        <!-- Icon -->
                         <div class="flex-shrink-0">
                             <div x-bind:class="getIconBg(notification.type)"
                                 class="w-10 h-10 rounded-xl flex items-center justify-center">
                                 <svg x-bind:class="getIconColor(notification.type)" class="w-5 h-5" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
-                                    <path x-show="notification.type === 'success'" stroke-linecap="round"
-                                        stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    <path x-show="notification.type === 'warning'" stroke-linecap="round"
-                                        stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    <path x-show="notification.type === 'danger'" stroke-linecap="round"
-                                        stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    <path x-show="notification.type === 'info'" stroke-linecap="round"
-                                        stroke-linejoin="round" stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path x-show="notification.type === 'success'"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"
+                                        stroke-linejoin="round" stroke-width="2" />
+                                    <path x-show="notification.type === 'warning'"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                    <path x-show="notification.type === 'danger'"
+                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"
+                                        stroke-linejoin="round" stroke-width="2" />
+                                    <path x-show="notification.type === 'info'"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                                 </svg>
                             </div>
                         </div>
 
-                        <!-- Content -->
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between gap-2">
-                                <h4 class="text-sm font-bold text-gray-900"
-                                    x-bind:class="!notification.is_read ? 'font-black' : ''"
-                                    x-text="notification.title">
-                                </h4>
+                                <h4 class="text-xs sm:text-sm font-bold text-gray-900 truncate"
+                                    x-bind:class="!notification.is_read ? 'font-black text-indigo-900' : ''"
+                                    x-text="notification.title"></h4>
                                 <span x-show="!notification.is_read"
-                                    class="flex-shrink-0 w-2 h-2 bg-indigo-600 rounded-full mt-1">
-                                </span>
+                                    class="flex-shrink-0 w-2 h-2 bg-indigo-600 rounded-full mt-1"></span>
                             </div>
-                            <p class="text-xs text-gray-600 mt-1 line-clamp-2" x-text="notification.message"></p>
-                            <p class="text-xs text-gray-400 mt-2" x-text="formatTime(notification.created_at)"></p>
+                            <p class="text-[11px] sm:text-xs text-gray-600 mt-0.5 line-clamp-2"
+                                x-text="notification.message"></p>
+                            <p class="text-[10px] text-gray-400 mt-1.5 font-medium"
+                                x-text="formatTime(notification.created_at)"></p>
                         </div>
                     </div>
                 </div>
             </template>
         </div>
 
-        <!-- Footer -->
-        <div class="p-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+        <div class="p-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl sticky bottom-0">
             <a href="<?php echo e(route($notifRoute)); ?>"
-                class="block text-center text-xs font-bold text-indigo-600 hover:text-indigo-700">
-                Lihat Semua Notifikasi
+                class="block text-center text-xs font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-wider">
+                Lihat Semua
             </a>
         </div>
     </div>

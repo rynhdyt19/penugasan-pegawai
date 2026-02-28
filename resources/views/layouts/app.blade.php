@@ -91,7 +91,7 @@
                 </div>
             </div>
 
-            <div class="px-6 mb-6">
+            {{-- <div class="px-6 mb-6">
                 <div class="relative group">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                         <svg class="w-4 h-4 text-gray-300 group-focus-within:text-indigo-500 transition-colors"
@@ -103,7 +103,7 @@
                     <input type="text" placeholder="Cari fitur..."
                         class="w-full pl-10 pr-4 py-3 text-xs font-bold border-none rounded-2xl bg-gray-50 focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none placeholder:text-gray-300">
                 </div>
-            </div>
+            </div> --}}
 
             <nav class="flex-1 overflow-y-auto custom-scrollbar px-6 space-y-1">
                 <p class="px-3 mb-3 text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">Menu Utama</p>
@@ -140,6 +140,14 @@
                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <span>Penjadwalan</span>
+                    </a>
+                    <a href="{{ url('admin/laporan') }}"
+                        class="sidebar-link {{ request()->is('admin/laporan*') ? 'active' : 'text-gray-500' }} flex items-center space-x-3 px-4 py-3.5 rounded-2xl text-sm font-bold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Laporan & Monitoring</span>
                     </a>
                 @else
                     <a href="{{ route('pegawai.dashboard') }}"
